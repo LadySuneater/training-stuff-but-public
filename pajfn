@@ -1,0 +1,154 @@
+class mazlicek:
+    def __init__(self,jmeno): #konstruktor
+        self._spokojenost = False
+        self._jmeno = jmeno
+    def __str__(self): #vypis mazlicka a jeho stavu
+        if self._spokojenost:
+            return f"{self._jmeno} je spokojeny";
+        else:
+            return f"{self._jmeno} je nespokojeny"
+
+class papousek(mazlicek):
+    def __init__(self, jmeno):
+        super().__init__(jmeno)
+        self.__zrni = False
+        self.__voda = False
+        self.__povidani = False
+    def set_spokojenost(self):
+        self._spokojenost = self.__zrni and self.__voda and self.__povidani
+    def nasypat_zrni(self):
+        self.__zrni = True
+        self.set_spokojenost()
+    def vymenit_vodu(self):
+        self.__voda = True
+        self.set_spokojenost()
+    def povidat_si(self):
+        self.__povidani = True
+        self.set_spokojenost()
+    def pece(self):
+        druh_pece = input("Jak chces pecovat o papouska? Muzes nasypat zrni, vymenit vodu nebo si popovidat. Napis 'zrni', 'voda' nebo 'povidani'.")
+        if druh_pece.lower() == "zrni":
+            self.nasypat_zrni()
+        elif druh_pece.lower() == "voda":
+            self.vymenit_vodu()
+        elif druh_pece.lower() == "povidani":
+            slovo = input("Rekni neco papouskovi.")
+            if slovo != "":
+                return slovo
+            self.povidat_si()
+        else:
+            return f"Neplatny input. Takovou peci papousek nepotrebuje."
+
+class chameleon(mazlicek):
+    def __init__(self, jmeno):
+        super().__init__(jmeno)
+        self._schovavana = False
+        self._voda = False
+        self._cvrcci = False
+    def set_spokojenost(self):
+        self._spokojenost = self._schovavana and self._voda and self._cvrcci
+    def hrat_na_schovavanou(self):
+        self.__schovavana = True
+        self.set_spokojenost()
+    def vymenit_vodu(self):
+        self.__voda = True
+        self.set_spokojenost()
+    def nasypat_cvrcky(self):
+        self.__cvrcci = True
+        self.set_spokojenost()
+    def pece(self):
+        druh_pece = input("Jak chces pecovat o chameleona? Muzes nasypat cvrcky, vymenit vodu nebo si hrat na schovavanou. Napis 'cvrcci', 'voda' nebo 'schovka'.")
+        if druh_pece.lower() == "cvrcci":
+            self.nasypat_cvrcky()
+        elif druh_pece.lower() == "voda":
+            self.vymenit_vodu()
+        elif druh_pece.lower() == "schovka":
+             def hledani_chameleona(schovka):
+                pokusy = 0
+                max_pokusy = 3
+                while pokusy < max_pokusy:
+                    tip = input(
+                        "Kam se schoval chameleon? Moznosti jsou 'postel', 'knihovna', 'kuchyne', 'pradelni kos' a 'policka'. Hledej poradne a odpovez jednim ze slov: ").lower()
+                    if tip == schovka:
+                        print("Gratuluji, nasel jsi chameleona a ten je spokojeny!")
+                        self.hrat_na_schovavanou()
+                        return True
+                    else:
+                        print("Tady chameleon neni. Zkus to znovu.")
+                        pokusy += 1
+                print("Bohuzel, vycerpal jsi vsechny pokusy na hadani. Chameleon opravdu dobre splynul s okolim, ale neni spokojeny. Byl schovany zde:",
+                      schovka)
+                return False
+
+             if __name__ == "__main__":
+                schovka = schovany_chameleon()
+                hledani_chameleona(schovka)
+
+class zverinec:
+    def __init__(self, soubor):
+        import pickle
+        self.__soubor = soubor
+        try:
+            file = open(self.__soubor, 'rb')
+            self.__seznam = pickle.load(file)
+        except:
+            self.__seznam = list()
+
+    def ukladani(self):
+        import pickle
+        with open(self.__soubor, "wb") as file:
+            pickle.dump(self.__seznam,file)
+
+    def zvirata_ve_zverinci(self):
+        for zvire in self.__seznam:
+            print(zvire)
+
+    def celkova_spokojenost(self):
+        vysledek = True
+        for zvire in self.__seznam:
+            vysledek = vysledek and zvire._spokojenost
+        return vysledek
+
+    def pridej_zvire(self):
+        volba = input("Jake zvire chcete pridat do zverince? Zde jsou moznosti: chameleon, papousek ")
+        if volba.lower() == "chameleon":
+            self.__seznam.append(chameleon)
+        if volba.lower() == "papousek":
+            self.__seznam.append(papousek)
+
+    def pece_o_zvire(self):
+        print("O ktere zvire se chcete postarat? Moznosti jsou nasledujici:")
+        for index, zvire in enumerate(self.__seznam, start = 1):
+            print(f"{index}. {zvire}")
+            volba = input("Zvolte jedno ze zvirat.")
+            if volba.lower() == zvire._jmeno.lower():
+                if isinstance(zvire, papousek):
+                    zvire.pece()
+                elif isinstance(zvire, chameleon):
+                    zvire.pece()
+                else:
+                    print("Takove zvire v seznamu neni.")
+                break
+        else:
+            print("Zvire nenalezeno.")
+
+def main():
+    zver = zverinec("soubor.dat")
+    print("Vitejte ve zverinci. Co si prejete provest?")
+    print("1 - Pridat zvire")
+    print("2 - Zobrazit seznam zvirat")
+    print("3 - Postarat se o zvire")
+    print("End - Ukoncit program")
+    volba = input("Vyberte jedno z cisel:")
+    zver.ukladani()
+    if volba.lower() == "end":
+        print("Ukoncili jste program.")
+    elif volba == "1":
+        zver.pridej_zvire()
+    elif volba == "2":
+        zver.zvirata_ve_zverinci()
+    elif volba == "3":
+        zver.pece_o_zvire()
+
+if __name__=="__main__":
+    main()
